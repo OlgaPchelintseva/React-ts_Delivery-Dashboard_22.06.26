@@ -1,16 +1,32 @@
 import { useState } from 'react';
 import { GenericList } from './components/GenericList';
 import { DeliveryCard } from './components/DeliveryCard';
+import { useDelivery } from './context/DeliveryContext';
+import { CourierManager } from './components/CourierManager';
+import { QuickSearch } from './components/QuickSearch';
+import { OrderManagmentModal } from './components/OrderManagmentModal';
 
 const DashboardConsole = (): JSX.Element => {
-  const filteredOrders;
+  const  { state, assignCourierToOrder, updateOrderStatus } = useDelivery();
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
-  const handleInteractOrder = (id: string) => {
-    const courierName = prompt ('Введите имя курьера');
-    if (courierName) {
+  if (state.status === 'LOADING') return <h2>Загрузка данных</h2>;
+  if (state.status === 'ERROR') return <h2>{state.message}</h2>;
 
-    }
-  }
+  // const filteredOrders = state.status === 'SUCCESS' ? state.data : []; - заглушка
+  const filteredOrders = state.data.filter(order => 
+    order.customAdress.toLowerCase().includes(searchQuery.toLowerCase()) || order.id.includes(searchQuery)
+  );
+
+  // const handleInteractOrder = (id: string) => {
+  //   const courierName = prompt ('Введите имя курьера');
+  //   if (courierName) {
+  //     assignCourierToOrder(id, courierName);
+  //   }
+  // } - заглушка
+
+  const activeOrder = state.data.find(order => order.id === selectedOrderId)
 
   return (
     <div style={{
@@ -23,25 +39,42 @@ const DashboardConsole = (): JSX.Element => {
         paddingBottom: '12px',
         marginBottom: '24px'
       }}>
-        <h1>Операционная панель управления заказами</h1>
+        <h1>Delivery Dashboard</h1>
       </header>
       <div style={{
         display: 'grid',
         gridTemplateColumns: '2fr 1fr',
         gap: '24px'
       }}>
-        <h2>Активные заказы</h2>
-        <GenericList
-          items={filteredOrders}
-          emptyPlaceholder='Заказы не найдены'
-          renderItem={(order) => {
-            <DeliveryCard 
-              order={order}
-              onSelectedOrder={handleInteractOrder}
-            />
-          }}
-        />
+        <div>
+          <QuickSearch onSearchSubmit={(query) => setSearchQuery(query)}/>
+          <h2>Активные заказы</h2>
+          <GenericList
+            items={filteredOrders}
+            emptyPlaceholder='Заказы не найдены'
+            renderItem={(order) => (
+              <DeliveryCard 
+                order={order}
+                onSelectedOrder={(id) => setSelectedOrderId(id)}
+              />
+            )}
+          />
+        </div>
+        <div>
+          <h2>Персонал</h2>
+          <CourierManager />
+        </div>
       </div>
+      {activeOrder && (
+        <OrderManagmentModal 
+          order={activeOrder}
+          onClose={() => setSelectedOrderId(null)}
+          onUpdateStatus={updateOrderStatus}
+          onAssingCourier={assignCourierToOrder}
+        />
+      )}
     </div>
   );
 }
+
+export default DashboardConsole;

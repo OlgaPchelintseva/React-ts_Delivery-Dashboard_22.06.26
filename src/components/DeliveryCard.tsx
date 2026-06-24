@@ -47,7 +47,7 @@ export const DeliveryCard = ({order, onSelectedOrder}: DeliveryCardProps): JSX.E
                     <b>Курьер</b> {order.assignedCourier.name}({order.assignedCourier.transport})
                 </p>
             ) : (
-                <p style={{color: 'dc2626'}}>
+                <p style={{color: '#dc2626'}}>
                     Ожидает назначения курьера
                 </p>
             )}
@@ -59,7 +59,8 @@ export const DeliveryCard = ({order, onSelectedOrder}: DeliveryCardProps): JSX.E
                     border: 'none',
                     padding: '8px 12px',
                     marginTop: '8px',
-                    width: '100%'
+                    width: '100%',
+                    cursor: 'pointer'
                 }}
             >Управление заказом</button>
         </div>
